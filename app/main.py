@@ -5,6 +5,7 @@ from app.api.v1.routes import (
     cv_extraction,
     hr_chatbot,
     hr_panel,
+    pseudonymize,
 )
 
 app = FastAPI(
@@ -19,6 +20,9 @@ app.include_router(text_to_speech.router, prefix="/api/v1/tts", tags=["Text-to-S
 app.include_router(cv_extraction.router, prefix="/api/v1/cv", tags=["CV Extraction"])
 app.include_router(hr_chatbot.router, prefix="/api/v1/hr-bot", tags=["HR Chatbot"])
 app.include_router(hr_panel.router, prefix="/api/v1/hr-panel", tags=["HR Panel"])
+app.include_router(
+    pseudonymize.router, prefix="/api/v1/pseudonymize", tags=["Pseudonymize"]
+)
 
 
 if __name__ == "__main__":
