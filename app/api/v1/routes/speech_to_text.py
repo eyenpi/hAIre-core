@@ -10,12 +10,16 @@ router = APIRouter()
 
 @router.post("/convert")
 async def speech_to_text(audio_file: UploadFile = File(...)):
-    audio_bytes = await audio_file.read()
+    try:
+        audio_bytes = await audio_file.read()
 
-    # Load the audio using librosa from bytes
-    audio, sr = librosa.load(io.BytesIO(audio_bytes), sr=16000)
+        # Load the audio using librosa from bytes
+        audio, sr = librosa.load(io.BytesIO(audio_bytes), sr=16000)
 
-    # Transcribe the audio
-    transcript = get_text_of_sound(audio)
-    return {'message': transcript}
+        # Transcribe the audio
+        transcript = get_text_of_sound(audio)
+        return {'message': transcript}
+    
+    except Exception as e:
+        return {'error': str(e)}
 
