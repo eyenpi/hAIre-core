@@ -20,57 +20,52 @@ class HRQuestionnaireAgent:
         self.evaluation_agent = HREvaluationAgent(api_key)
         self.clarification_agent = ClarificationAgent(api_key)
 
-    def ask_question(self) -> Dict[str, str]:
+    def handle_question_and_answer(self, answer: str = None) -> Dict[str, str]:
         """
-        Return the current question to be asked.
+        Handles both asking the next question and receiving the user's answer.
 
-        :return: A dictionary with the current question and the current question index.
+        :param answer: The answer provided by the candidate. If None, return the first or next question.
+        :return: A dictionary with the next question or evaluation result.
         """
+        # Check if all questions are completed
         if self.current_question_index >= len(self.questions):
-            return {"status": "completed", "message": "All questions have been asked."}
+            return {"status": "completed", "question": None}
 
-        question = self.questions[self.current_question_index]
-        return {
-            "status": "in_progress",
-            "question": question,
-            "current_question_index": self.current_question_index,
-            "total_questions": len(self.questions),
-        }
+        # If no answer provided (first call), return the first or next question
+        if answer is None:
+            question = self.questions[self.current_question_index]
+            return {
+                "status": "in_progress",
+                "question": question,
+            }
 
-    def receive_answer(self, answer: str) -> Dict[str, str]:
-        """
-        Process the user's answer, evaluate it, and either ask the next question or generate a follow-up clarification question.
-
-        :param answer: The answer provided by the candidate.
-        :return: A dictionary with the evaluation result or follow-up question if clarification is needed.
-        """
+        # Process the provided answer
         question = self.questions[self.current_question_index]
         self.answers.append(answer)
 
         evaluation = self.evaluation_agent.evaluate_answer(question, answer)
-        print(f"Evaluation: {evaluation}")
 
         if evaluation.get("Relevance", 0) < 6:
             follow_up_question = self.clarification_agent.generate_clarification(
                 question, answer
             )
             return {
-                "status": "clarification_needed",
-                "follow_up_question": follow_up_question,
-                "current_question_index": self.current_question_index,
+                "status": "in_progress",
+                "question": follow_up_question,
             }
 
+        # Move to the next question if the answer is relevant
         self.current_question_index += 1
+
+        # Check if there are more questions
         if self.current_question_index < len(self.questions):
             return {
                 "status": "in_progress",
-                "next_question": self.questions[self.current_question_index],
-                "current_question_index": self.current_question_index,
-                "total_questions": len(self.questions),
+                "question": self.questions[self.current_question_index],
             }
-        else:
-            return {
-                "status": "completed",
-                "answers": self.answers,
-                "message": "All questions have been asked and answered.",
-            }
+
+        # If no more questions, mark the process as completed
+        return {
+            "status": "completed",
+            "question": None,
+        }
