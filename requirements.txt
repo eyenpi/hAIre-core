@@ -3,3 +3,6 @@ uvicorn
 openai
 python-dotenv
 python-multipart
+transformers
+cryptography
+torch
