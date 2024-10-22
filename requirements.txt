@@ -1,2 +1,11 @@
 fastapi
 uvicorn
+transformers
+datasets[audio]
+accelerate
+torch
+fastapi[standard]
+ffmpeg-python
+git+https://github.com/openai/whisper.git
+librosa
+sentencepiece
