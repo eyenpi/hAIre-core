@@ -1,5 +1,7 @@
 assets/
 .idea/
+*.mp3
+*.wav
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -7,6 +7,7 @@ from app.api.v1.routes import (
     hr_chatbot,
     hr_panel,
     pseudonymize,
+    flow,
 )
 
 app = FastAPI(
@@ -33,6 +34,7 @@ app.include_router(hr_panel.router, prefix="/api/v1/hr-panel", tags=["HR Panel"]
 app.include_router(
     pseudonymize.router, prefix="/api/v1/pseudonymize", tags=["Pseudonymize"]
 )
+app.include_router(flow.router, prefix="/api/v1/flow", tags=["Flow"])
 
 if __name__ == "__main__":
     import uvicorn

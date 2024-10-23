@@ -12,4 +12,4 @@ sentencepiece
 openai
 python-dotenv
 python-multipart
-cryptography
+soundfile

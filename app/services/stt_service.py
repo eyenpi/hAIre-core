@@ -1,6 +1,11 @@
-from app.models.stt_tts_model import STT
+import whisper
 
 
-def get_text_of_sound(audio):
-    model = STT()
-    return model.execute(audio)
+class STT:
+    model = None
+
+    def __init__(self):
+        self.model = whisper.load_model("tiny")
+
+    def execute(self, audio):
+        return self.model.transcribe(audio)["text"]
