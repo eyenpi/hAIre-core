@@ -11,3 +11,5 @@ librosa
 sentencepiece
 openai
 python-dotenv
+python-multipart
+cryptography
