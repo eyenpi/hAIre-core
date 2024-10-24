@@ -26,9 +26,6 @@ hr_report_generator = HRReportGenerator(api_key=api_key)
 
 @router.post("/config", status_code=status.HTTP_201_CREATED)
 async def save_config(data: HRInputModel):
-    global hr_config
-    hr_config = data
-
     # Write questions to a JSON file
     with open(QUESTIONS_FILE, "w+") as file:
         json.dump(data.model_dump_json(), file)  # Save the list as JSON
@@ -61,7 +58,6 @@ async def generate_report(conversation: str = Body(...)):
     """
     file_path = "assets/hr_report.pdf"
     hr_config = get_hr_config()
-    print(hr_config)
     metrics = hr_config["metrics"]
 
     if not hr_config["metrics"]:

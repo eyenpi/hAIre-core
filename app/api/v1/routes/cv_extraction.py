@@ -13,7 +13,7 @@ load_dotenv()
 
 # Configure logging
 logging.basicConfig(
-    filename="cv_extraction.log",
+    filename="logs/cv_extraction.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
@@ -31,14 +31,13 @@ async def cv_extraction(cv_file: UploadFile = File(...)):
         dp = AnonymizationProcessor(entity_recognizer)
 
         updated_config = get_hr_config()
-        print(type(updated_config))
         AgentSingleton.update_instance(updated_config)
         logging.info("New user registered. HR questions updated.")
 
         pdf_bytes = await cv_file.read()
 
         # Write to a file
-        file_path = f"temp.pdf"
+        file_path = f"assets/temp.pdf"
         with open(file_path, "wb") as f:
             f.write(pdf_bytes)
 

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Create file handler to log to a file
-file_handler = logging.FileHandler("app_log.log")
+file_handler = logging.FileHandler("logs/app_log.log")
 file_handler.setLevel(logging.INFO)
 
 # Create a formatter and set it for the file handler
@@ -41,7 +41,7 @@ tts_service = TextToSpeechService()
 
 # Helper function to save question and answer to file
 def save_question_and_answer(question: str, answer: str = None):
-    with open("conversation_log.txt", "a+") as file:
+    with open("logs/conversation.log", "a+") as file:
         if not answer:
             file.write(f"**Start of Conversation**\n\nQuestion: {question}\n")
         elif not question:
@@ -103,7 +103,7 @@ async def process_audio(audio_file: UploadFile = File(...)):
         # Step 1: Receive audio file from frontend and transcribe it
         audio_bytes = await audio_file.read()
 
-        temp_audio_path = "temp_audio_file.wav"
+        temp_audio_path = "assets/temp_audio_file.wav"
         with open(temp_audio_path, "wb") as f:
             f.write(audio_bytes)
 

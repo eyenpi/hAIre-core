@@ -13,10 +13,8 @@ class HRQuestionnaireAgent:
         :param questions: List of questions prepared by an HR expert.
         """
         self.client = OpenAI(api_key=api_key)
-        print(type(config))
 
         self.questions = config["questions"]
-        print(self.questions)
 
         self.answers = []
         self.current_question_index = 0
