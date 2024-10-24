@@ -1,5 +1,7 @@
 assets/
 .idea/
+*.mp3
+*.wav
 
 *.pdf
 
