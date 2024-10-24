@@ -128,6 +128,7 @@ class DataProcessor:
         self.pseudonymizer = Pseudonymizer()
 
     def process_text(self, text):
+        text = text.lower()
         # Step 1: Identify entities
         entity_dict = self.entity_recognizer.identify_entities(text)
 
