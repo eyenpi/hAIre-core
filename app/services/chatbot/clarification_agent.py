@@ -26,6 +26,7 @@ class ClarificationAgent:
         {answer}
 
         Provide a rephrased or clarifying question to help the candidate better understand the original question. Keep the question clear and concise.
+        Write the next question in the same language as the original question.
         """
         return clarification_prompt
 

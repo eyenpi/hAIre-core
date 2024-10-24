@@ -46,8 +46,6 @@ def save_question_and_answer(question: str, answer: str = None):
     with open(log_file_path, "a+") as file:
         if not answer:
             file.write(f"**Start of Conversation**\n\nQuestion: {question}\n")
-        elif not question:
-            file.write(f"**End of conversation**")
         else:
             file.write(f"Answer: {answer}\n\nQuestion: {question}\n")
 
@@ -134,10 +132,9 @@ async def process_audio(audio_file: UploadFile = File(...)):
         logger.info(f"Chatbot response: {chatbot_response}")
 
         # Save the question and the user's transcribed and pseudonymized answer
-        save_question_and_answer(
-            chatbot_response["question"],
-            anonymizer_service.reverse_anonymization(pseudonymized_text),
-        )
+        revanon = anonymizer_service.reverse_anonymization(pseudonymized_text)
+        logger.info(f"Reversed anonimyzed: {revanon}")
+        save_question_and_answer(chatbot_response["question"], pseudonymized_text)
 
         if chatbot_response["status"] == "completed":
             logger.info("Chatbot conversation completed.")
