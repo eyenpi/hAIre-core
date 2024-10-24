@@ -7,6 +7,7 @@ from app.utils.singleton import AgentSingleton
 from app.services.tts_service import TextToSpeechService
 import base64
 import librosa
+import os
 
 # Initialize logger and log to a file
 logger = logging.getLogger(__name__)
@@ -37,11 +38,12 @@ anonymizer_service = AnonymizationProcessor(
     entity_recognizer
 )  # Updated to use AnonymizationProcessor
 tts_service = TextToSpeechService()
+log_file_path = "logs/conversation.log"
 
 
 # Helper function to save question and answer to file
 def save_question_and_answer(question: str, answer: str = None):
-    with open("logs/conversation.log", "a+") as file:
+    with open(log_file_path, "a+") as file:
         if not answer:
             file.write(f"**Start of Conversation**\n\nQuestion: {question}\n")
         elif not question:
@@ -59,6 +61,10 @@ async def get_first_question():
     try:
         logger.info("Getting the first question from the chatbot.")
         chatbot_service = AgentSingleton.get_instance()
+
+        if os.path.exists(log_file_path):
+            os.remove(log_file_path)
+        logger.info("Removed existing conversation log file.")
 
         # Step 1: Get the first question from the chatbot
         first_question_response = chatbot_service.handle_question_and_answer()

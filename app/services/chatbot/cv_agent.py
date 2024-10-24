@@ -23,11 +23,12 @@ class HRCVQuestionAgent:
 
         {resume}
 
-        Ask one question from the interviewee to find out more about him based on his resume. Keep the question short and concise. Do not ask technical questions or any questions that reference company names, locations, personal names, or any specific detail in the description of the resume. The questions should focus on the candidate's work style, strengths, weaknesses, teamwork, and goals.
+        Ask one question from the interviewee to find out more about him based on his resume. Do not ask technical questions or any questions that reference company names, locations, personal names, or any specific detail in the description of the resume. The questions should focus on the candidate's work style, strengths, weaknesses, teamwork, and goals.
+        Keep the question short and simple, and avoid including any personal information or details from the resume in the question.
         """
         return question_prompt
 
-    def generate_questions(self, resume: str, num_questions: int = 2) -> List[str]:
+    def generate_questions(self, resume: str) -> List[str]:
         """
         Generate a set of general HR interview questions based on the provided resume.
 
@@ -42,8 +43,7 @@ class HRCVQuestionAgent:
             messages=[
                 {"role": "assistant", "content": question_prompt},
             ],
-            n=num_questions,
         )
 
-        questions = [choice.message.content for choice in response.choices]
+        questions = [response.choices[0].message.content]
         return questions

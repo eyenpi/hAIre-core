@@ -22,7 +22,7 @@ class HRQuestionnaireAgent:
             self.cv_agent = HRCVQuestionAgent(api_key)
             with open("assets/segmented_cv.json", "r") as f:
                 cv_data = json.load(f)
-            new_questions = self.cv_agent.generate_questions(cv_data, num_questions=3)
+            new_questions = self.cv_agent.generate_questions(cv_data)
             for new_question in new_questions:
                 self.questions.append(new_question)
 
@@ -57,7 +57,7 @@ class HRQuestionnaireAgent:
 
         evaluation = self.evaluation_agent.evaluate_answer(question, answer)
 
-        if evaluation.get("Relevance", 0) < 6:
+        if evaluation.get("Relevance", 0) < 5:
             follow_up_question = self.clarification_agent.generate_clarification(
                 question, answer
             )

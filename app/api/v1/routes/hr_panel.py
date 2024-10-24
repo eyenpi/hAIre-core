@@ -8,6 +8,7 @@ from app.utils.file_reader import get_hr_config
 from app.services.hr_report import HRReportGenerator
 from app.models.hr_model import HRInputModel
 from app.utils.singleton import AgentSingleton
+from app.utils.mail import EmailSender
 
 load_dotenv()
 
@@ -60,13 +61,14 @@ async def get_config():
     )
 
 
-@router.post("/generate-report", status_code=status.HTTP_200_OK)
-async def generate_report(conversation: str = Body(...)):
+@router.get("/generate-report", status_code=status.HTTP_200_OK)
+async def generate_report():
     """
     Generate a human-readable HR report based on the provided interview conversation.
     :param conversation: The interview conversation (questions and answers)
     :return: A formatted HR report for the manager.
     """
+    conversation_file = "logs/conversation.log"
     file_path = "assets/hr_report.pdf"
     hr_config = get_hr_config()
     metrics = hr_config["metrics"]
@@ -79,9 +81,22 @@ async def generate_report(conversation: str = Body(...)):
             "Consistency",
             "Strengths and Weaknesses",
         ]
+    # read conversation from file
+    with open(conversation_file, "r") as file:
+        conversation = file.read()
+
     report_content = hr_report_generator.generate_report(
         conversation, file_path, criteria=metrics
     )
+
+    email_sender = EmailSender()
+    email_sender.send_email(
+        to_email=hr_config["email_address"],
+        subject="HR Interview Report",
+        body="Please find the attached HR interview report for your review.",
+        file_path=file_path,
+    )
+
     return FileResponse(
         file_path, media_type="application/pdf", filename="hr_report.pdf"
     )
