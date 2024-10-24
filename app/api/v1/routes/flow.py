@@ -37,6 +37,15 @@ anonymizer_service = DataProcessor()
 tts_service = TextToSpeechService()
 
 
+# Helper function to save question and answer to file
+def save_question_and_answer(question: str, answer: str = None):
+    with open("conversation_log.txt", "a+") as file:
+        if not answer:
+            file.write(f"Question: {question}\n")
+        else:
+            file.write(f"Answer: {answer}\n\nQuestion: {question}\n")
+
+
 @router.post("/start/")
 async def get_first_question():
     """
@@ -54,6 +63,9 @@ async def get_first_question():
         logger.info(f"First question received: {first_question_response['question']}")
         logger.info(f"Status: {first_question_response['status']}")
 
+        # No user answer yet, but we save the question
+        save_question_and_answer(first_question_response["question"])
+
         # Step 2: Convert the question text to speech using TTS
         question_text = first_question_response["question"]
         audio_content = tts_service.get_sound_of_text(question_text)
@@ -66,7 +78,7 @@ async def get_first_question():
         response = {
             "status": first_question_response["status"],
             "question_text": question_text,
-            "question_audio": audio_base64,  # This is the audio in base64 format
+            "question_audio": audio_base64,
         }
         logger.info("Returning JSON response with question text and audio.")
         return JSONResponse(content=response)
@@ -79,13 +91,13 @@ async def get_first_question():
 
 
 @router.post("/next_step/")
-async def process_audio(file: UploadFile = File(...)):
+async def process_audio(audio_file: UploadFile = File(...)):
     try:
         logger.info("Received audio file from frontend")
         chatbot_service = AgentSingleton.get_instance()
 
         # Step 1: Receive audio file from frontend and transcribe it
-        audio_bytes = await file.read()
+        audio_bytes = await audio_file.read()
 
         temp_audio_path = "temp_audio_file.wav"
         with open(temp_audio_path, "wb") as f:
@@ -111,6 +123,14 @@ async def process_audio(file: UploadFile = File(...)):
             pseudonymized_text
         )
         logger.info(f"Chatbot response: {chatbot_response}")
+
+        # Save the question and the user's transcribed and pseudonymized answer
+        save_question_and_answer(
+            chatbot_response["question"],
+            anonymizer_service.depseudonymize_text(
+                pseudonymized_text, pseudonymized_entity_dict
+            ),
+        )
 
         if chatbot_response["status"] == "completed":
             logger.info("Chatbot conversation completed.")

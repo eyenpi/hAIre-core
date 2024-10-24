@@ -5,7 +5,18 @@ from app.services.chatbot.clarification_agent import ClarificationAgent
 
 
 class HRQuestionnaireAgent:
-    def __init__(self, api_key: str, questions: List[str]):
+    def __init__(
+        self,
+        api_key: str,
+        questions: List[str] = [
+            "Where do you see yourself in the next 5 years?",
+            "What is your biggest achievement?",
+            "What is your biggest weakness?",
+            "Why do you want to work with us?",
+            "What are your salary expectations",
+            "What are your hobbies?",
+        ],
+    ):
         """
         Initialize the HR Questionnaire Agent as a microservice.
 
