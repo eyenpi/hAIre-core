@@ -1,16 +1,33 @@
 import logging
 from fastapi import File, UploadFile, HTTPException, APIRouter
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse
 from io import BytesIO
 from app.services.stt_service import STT
 from app.services.pseudonymize import DataProcessor
 from app.utils.singleton import AgentSingleton
 from app.services.tts_service import TextToSpeechService
 import base64
+import librosa
 
-# Initialize logger
+# Initialize logger and log to a file
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logger.setLevel(logging.INFO)
+
+# Create file handler to log to a file
+file_handler = logging.FileHandler("app_log.log")
+file_handler.setLevel(logging.INFO)
+
+# Create a formatter and set it for the file handler
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+file_handler.setFormatter(formatter)
+
+# Add the file handler to the logger
+logger.addHandler(file_handler)
+
+# Optionally, also log to the console
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 
 router = APIRouter()
 
@@ -42,14 +59,17 @@ async def get_first_question():
         audio_content = tts_service.get_sound_of_text(question_text)
         logger.info("TTS conversion for the first question completed.")
 
-        # Step 3: Return both the text question and the audio file
-        audio_bytes_io = BytesIO(audio_content)
-        audio_bytes_io.seek(0)  # Move to the start of the BytesIO object for streaming
+        # Step 3: Encode audio content in base64 to send as part of the JSON response
+        audio_base64 = base64.b64encode(audio_content).decode("utf-8")
 
-        logger.info("Returning the audio file to the frontend.")
-
-        # Use StreamingResponse for BytesIO
-        return StreamingResponse(audio_bytes_io, media_type="audio/mpeg")
+        # Step 4: Return JSON response with question text and audio content
+        response = {
+            "status": first_question_response["status"],
+            "question_text": question_text,
+            "question_audio": audio_base64,  # This is the audio in base64 format
+        }
+        logger.info("Returning JSON response with question text and audio.")
+        return JSONResponse(content=response)
 
     except Exception as e:
         logger.error(f"Error retrieving first question: {str(e)}")
@@ -65,8 +85,19 @@ async def process_audio(file: UploadFile = File(...)):
         chatbot_service = AgentSingleton.get_instance()
 
         # Step 1: Receive audio file from frontend and transcribe it
-        audio_data = await file.read()
-        transcribed_text = stt_service.execute(audio_data)
+        audio_bytes = await file.read()
+
+        temp_audio_path = "temp_audio_file.wav"
+        with open(temp_audio_path, "wb") as f:
+            f.write(audio_bytes)
+
+        logger.info("Audio file written to disk at %s", temp_audio_path)
+
+        # Step 3: Load the audio file using librosa
+        audio, sr = librosa.load(temp_audio_path, sr=16000)
+        logger.info("Audio loaded successfully with sampling rate of %s.", sr)
+
+        transcribed_text = stt_service.execute(audio)
         logger.info(f"Transcription complete: {transcribed_text}")
 
         # Step 2: Pass the transcription through the anonymizer
@@ -80,6 +111,16 @@ async def process_audio(file: UploadFile = File(...)):
             pseudonymized_text
         )
         logger.info(f"Chatbot response: {chatbot_response}")
+
+        if chatbot_response["status"] == "completed":
+            logger.info("Chatbot conversation completed.")
+            return JSONResponse(
+                content={
+                    "status": "completed",
+                    "question_text": None,
+                    "question_audio": None,
+                }
+            )
 
         # Step 4: Convert chatbot's response to speech using TTS
         chatbot_answer = chatbot_response["question"]
@@ -96,7 +137,7 @@ async def process_audio(file: UploadFile = File(...)):
             "question_audio": audio_base64,  # This is the audio in base64 format
         }
         logger.info("Returning JSON response with question text and audio.")
-        return response
+        return JSONResponse(content=response)
 
     except Exception as e:
         logger.error(f"Error processing audio: {str(e)}")
