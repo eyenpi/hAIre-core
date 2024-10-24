@@ -3,6 +3,8 @@ assets/
 *.mp3
 *.wav
 
+*.pdf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -50,6 +50,38 @@ class Pseudonymizer:
             "SpongeBob SquarePants",
             "Scooby-Doo",
             "Bart Simpson",
+            "Shrek",
+            "Walter White",
+            "Bilbo Baggins",
+            "Jon Snow",
+            "Lara Croft",
+            "Mario",
+            "Luigi",
+            "Link",
+            "Princess Leia",
+            "Han Solo",
+            "Boba Fett",
+            "Doctor Who",
+            "Marty McFly",
+            "Tyler Durden",
+            "Katniss Everdeen",
+            "Neo",
+            "Trinity",
+            "John Wick",
+            "Buzz Lightyear",
+            "Woody",
+            "Elsa",
+            "Dory",
+            "Mulan",
+            "Ariel",
+            "Thor",
+            "Deadpool",
+            "Black Panther",
+            "Spock",
+            "Wolverine",
+            "Magneto",
+            "Charlie Brown",
+            "Pikachu",
         ]
 
         self.company_names = [
@@ -73,6 +105,23 @@ class Pseudonymizer:
             "Krusty Krab",
             "Planet Express",
             "Aperture Science",
+            "Black Mesa",
+            "Buy n Large",
+            "Vandelay Industries",
+            "Tyrell Corporation",
+            "LexCorp",
+            "Soylent Corporation",
+            "Virtucon",
+            "OCP (Omni Consumer Products)",
+            "Yoyodyne Propulsion Systems",
+            "Globex Corporation",
+            "Genco Pura Olive Oil Company",
+            "Prestige Worldwide",
+            "Cyberdyne",
+            "Dinoco",
+            "SpaceX",
+            "Delos Destinations",
+            "Roxxon Corporation",
         ]
 
         self.location_names = [
@@ -96,24 +145,52 @@ class Pseudonymizer:
             "Skyrim",
             "Atlantis",
             "Jurassic Park",
+            "Neverland",
+            "Emerald City",
+            "Cloud City",
+            "Endor",
+            "Gallifrey",
+            "King's Landing",
+            "Vice City",
+            "Liberty City",
+            "Silent Hill",
+            "Raccoon City",
+            "Zion",
+            "The Death Star",
+            "Agrabah",
+            "Duckburg",
+            "Elbonia",
+            "Genosha",
+            "Kamino",
+            "New New York",
+            "Sokovia",
+            "Wakanda",
+            "Themyscira",
         ]
         self.token_map = {}  # Maps original values to pseudonyms
         self.reverse_map = {}  # Maps pseudonyms back to original values
 
     def pseudonymize(self, data, entity_type):
-        """Pseudonymize the given data using the correct entity type list."""
+        """Pseudonymize the given data using the correct entity type list, ensuring uniqueness."""
         if data not in self.token_map:
             if entity_type == "PER":
-                token = random.choice(self.person_names)
+                base_token = random.choice(self.person_names)
             elif entity_type == "ORG":
-                token = random.choice(self.company_names)
+                base_token = random.choice(self.company_names)
             elif entity_type == "LOC":
-                token = random.choice(self.location_names)
+                base_token = random.choice(self.location_names)
             else:
-                token = data  # fallback in case the entity type is not known
+                base_token = data  # fallback in case the entity type is not known
 
-            self.token_map[data] = token
-            self.reverse_map[token] = data
+            # Ensure uniqueness by adding an index if the base token already exists
+            unique_token = base_token
+            count = 1
+            while unique_token in self.token_map.values():
+                unique_token = f"{base_token}_{count}"
+                count += 1
+
+            self.token_map[data] = unique_token
+            self.reverse_map[unique_token] = data
         return self.token_map[data]
 
     def depseudonymize(self, token):
@@ -128,6 +205,7 @@ class DataProcessor:
         self.pseudonymizer = Pseudonymizer()
 
     def process_text(self, text):
+        text = text.lower()
         # Step 1: Identify entities
         entity_dict = self.entity_recognizer.identify_entities(text)
 
