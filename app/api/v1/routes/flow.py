@@ -1,7 +1,6 @@
 import logging
 from fastapi import File, UploadFile, HTTPException, APIRouter
 from fastapi.responses import JSONResponse
-from io import BytesIO
 from app.services.stt_service import STT
 from app.services.pseudonymize import AnonymizationProcessor, EntityRecognizer
 from app.utils.singleton import AgentSingleton
@@ -44,7 +43,9 @@ tts_service = TextToSpeechService()
 def save_question_and_answer(question: str, answer: str = None):
     with open("conversation_log.txt", "a+") as file:
         if not answer:
-            file.write(f"Question: {question}\n")
+            file.write(f"**Start of Conversation**\n\nQuestion: {question}\n")
+        elif not question:
+            file.write(f"**End of conversation**")
         else:
             file.write(f"Answer: {answer}\n\nQuestion: {question}\n")
 

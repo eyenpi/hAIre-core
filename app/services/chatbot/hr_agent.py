@@ -5,18 +5,7 @@ from app.services.chatbot.clarification_agent import ClarificationAgent
 
 
 class HRQuestionnaireAgent:
-    def __init__(
-        self,
-        api_key: str,
-        questions: List[str] = [
-            "Where do you see yourself in the next 5 years?",
-            "What is your biggest achievement?",
-            "What is your biggest weakness?",
-            "Why do you want to work with us?",
-            "What are your salary expectations",
-            "What are your hobbies?",
-        ],
-    ):
+    def __init__(self, api_key: str, config: dict):
         """
         Initialize the HR Questionnaire Agent as a microservice.
 
@@ -24,7 +13,11 @@ class HRQuestionnaireAgent:
         :param questions: List of questions prepared by an HR expert.
         """
         self.client = OpenAI(api_key=api_key)
-        self.questions = questions
+        print(type(config))
+
+        self.questions = config["questions"]
+        print(self.questions)
+
         self.answers = []
         self.current_question_index = 0
 

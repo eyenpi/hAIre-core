@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.services.pseudonymize import AnonymizationProcessor, EntityRecognizer
-from app.utils.file_reader import get_hr_questions
+from app.utils.file_reader import get_hr_config
 from fastapi.responses import JSONResponse
 from app.utils.singleton import AgentSingleton
 from dotenv import load_dotenv
@@ -30,8 +30,9 @@ async def cv_extraction(cv_file: UploadFile = File(...)):
     try:
         dp = AnonymizationProcessor(entity_recognizer)
 
-        updated_questions = get_hr_questions()
-        AgentSingleton.update_instance(updated_questions)
+        updated_config = get_hr_config()
+        print(type(updated_config))
+        AgentSingleton.update_instance(updated_config)
         logging.info("New user registered. HR questions updated.")
 
         pdf_bytes = await cv_file.read()
