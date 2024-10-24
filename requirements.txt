@@ -13,3 +13,4 @@ openai
 python-dotenv
 python-multipart
 cryptography
+pypdf
