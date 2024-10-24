@@ -11,10 +11,10 @@ class EntityRecognizer:
         )
 
     def identify_entities(self, text):
-        entities = self.ner_pipeline(text)
+        entities = self.ner_pipeline(text.lower())
         entity_dict = {}
         for entity in entities:
-            entity_text = entity["word"]  # Extract the entity text
+            entity_text = entity["word"].lower()  # Extract the entity text
             entity_type = entity[
                 "entity_group"
             ]  # Extract the entity type (e.g., PER, ORG, LOC)

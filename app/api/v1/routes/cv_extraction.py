@@ -40,7 +40,7 @@ async def cv_extraction(cv_file: UploadFile = File(...)):
         dp = AnonymizationProcessor(entity_recognizer)
 
         updated_config = get_hr_config()
-        AgentSingleton.update_instance(updated_config)
+
         logger.info("New user registered. HR questions updated.")
 
         pdf_bytes = await cv_file.read()
@@ -70,11 +70,15 @@ async def cv_extraction(cv_file: UploadFile = File(...)):
         segmented_text = processor.segment_cv(pseudonymized_text)
         logger.info("CV segmented successfully. Segmented text: %s", segmented_text)
 
+        with open("assets/segmented_cv.json", "w") as f:
+            f.write(segmented_text)
+
         # Depseudonymize the segmented text to get the original data back
         depseudonymized_text = dp.reverse_anonymization(segmented_text)
         logger.info(
             "Depseudonymization completed. Final text: %s", depseudonymized_text
         )
+        AgentSingleton.update_instance(updated_config)
 
         return JSONResponse(
             status_code=200,

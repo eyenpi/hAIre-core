@@ -44,7 +44,6 @@ class ClarificationAgent:
             messages=[
                 {"role": "assistant", "content": clarification_prompt},
             ],
-            max_tokens=1000,
         )
 
         return response.choices[0].message.content

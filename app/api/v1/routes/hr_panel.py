@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from app.utils.file_reader import get_hr_config
 from app.services.hr_report import HRReportGenerator
 from app.models.hr_model import HRInputModel
+from app.utils.singleton import AgentSingleton
 
 load_dotenv()
 
@@ -46,6 +47,16 @@ async def get_config():
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"config": hr_config},
+    )
+
+
+@router.get("/questions", status_code=status.HTTP_200_OK)
+async def get_config():
+
+    agent = AgentSingleton.get_instance()
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"questions": agent.questions},
     )
 
 
