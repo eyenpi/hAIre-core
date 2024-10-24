@@ -11,12 +11,21 @@ import json
 
 load_dotenv()
 
-# Configure logging
-logging.basicConfig(
-    filename="logs/cv_extraction.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
+# Create the logs directory if it doesn't exist
+os.makedirs("logs", exist_ok=True)
+
+# Configure logging with FileHandler explicitly
+logger = logging.getLogger("cv_extraction_logger")
+logger.setLevel(logging.INFO)
+file_handler = logging.FileHandler("logs/cv_extraction.log")
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
+# Add a StreamHandler to see logs in console too (optional)
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
 
 router = APIRouter()
 
@@ -32,7 +41,7 @@ async def cv_extraction(cv_file: UploadFile = File(...)):
 
         updated_config = get_hr_config()
         AgentSingleton.update_instance(updated_config)
-        logging.info("New user registered. HR questions updated.")
+        logger.info("New user registered. HR questions updated.")
 
         pdf_bytes = await cv_file.read()
 
@@ -41,29 +50,29 @@ async def cv_extraction(cv_file: UploadFile = File(...)):
         with open(file_path, "wb") as f:
             f.write(pdf_bytes)
 
-        logging.info(f"CV file saved to {file_path}")
+        logger.info(f"CV file saved to {file_path}")
 
         # Pass the file path to extract text from the CV
         text = processor.extract_text_from_cv(file_path)
-        logging.info(
-            "CV text extracted successfully. Extracted text: %s", text
+        logger.info(
+            "CV text extracted successfully. Extracted text: %s", text[:500]
         )  # Log first 500 characters
 
         # Pseudonymize the extracted CV text
         pseudonymized_text = dp.anonymize_text(text)
-        logging.info(
+        logger.info(
             "Pseudonymization completed. Pseudonymized text: %s",
             pseudonymized_text,
         )
-        logging.info("Pseudonymized entity dict: %s", dp.entity_map)
+        logger.info("Pseudonymized entity dict: %s", dp.entity_map)
 
         # Segment the pseudonymized text
         segmented_text = processor.segment_cv(pseudonymized_text)
-        logging.info("CV segmented successfully. Segmented text: %s", segmented_text)
+        logger.info("CV segmented successfully. Segmented text: %s", segmented_text)
 
         # Depseudonymize the segmented text to get the original data back
         depseudonymized_text = dp.reverse_anonymization(segmented_text)
-        logging.info(
+        logger.info(
             "Depseudonymization completed. Final text: %s", depseudonymized_text
         )
 
@@ -73,7 +82,7 @@ async def cv_extraction(cv_file: UploadFile = File(...)):
         )
 
     except Exception as e:
-        logging.error(f"Error during CV extraction: {str(e)}")
+        logger.error(f"Error during CV extraction: {str(e)}")
         raise HTTPException(
             status_code=500, detail="An error occurred during CV extraction."
         )

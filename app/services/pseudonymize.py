@@ -1,4 +1,3 @@
-import random
 import re
 from transformers import pipeline
 import uuid
@@ -15,14 +14,16 @@ class EntityRecognizer:
         entities = self.ner_pipeline(text)
         entity_dict = {}
         for entity in entities:
-            entity_text = text[
-                entity["start"] : entity["end"]
-            ]  # Extract full entity based on start and end positions
+            entity_text = entity["word"]  # Extract the entity text
             entity_type = entity[
                 "entity_group"
             ]  # Extract the entity type (e.g., PER, ORG, LOC)
             if entity_type in ["PER", "ORG", "LOC"]:  # Only store sensitive types
-                entity_dict[entity_text] = entity_type  # Store both entity and its type
+                if entity_text not in entity_dict:
+                    if not "#" in entity_text and len(entity_text) > 2:
+                        entity_dict[entity_text] = (
+                            entity_type  # Store both entity and its type
+                        )
         return entity_dict
 
 
@@ -36,13 +37,17 @@ class AnonymizationProcessor:
 
         # Sort entities by length in descending order
         sorted_entities = sorted(
-            entities.items(), key=lambda x: len(x[0]), reverse=True
+            entities.items(), key=lambda x: len(x[1]), reverse=True
         )
 
-        anonymized_text = text
+        anonymized_text = text.lower()
         for entity, entity_type in sorted_entities:
-            pseudonym = self.generate_pseudonym(entity_type)
-            self.entity_map[pseudonym] = entity  # Store mapping for reversal
+            # If the entity has been anonymized already, use the same pseudonym
+            if entity not in self.entity_map.values():
+                pseudonym = self.generate_pseudonym(entity_type)
+                self.entity_map[pseudonym] = entity  # Store mapping for reversal
+            else:
+                pseudonym = [k for k, v in self.entity_map.items() if v == entity][0]
 
             # Use regex to replace only whole words and avoid partial matches
             anonymized_text = re.sub(
@@ -51,7 +56,7 @@ class AnonymizationProcessor:
         return anonymized_text
 
     def reverse_anonymization(self, anonymized_text: str) -> str:
-        original_text = anonymized_text
+        original_text = anonymized_text.lower()
         for pseudonym, entity in self.entity_map.items():
             # Use regex to ensure full word match for replacement
             original_text = re.sub(
@@ -62,8 +67,8 @@ class AnonymizationProcessor:
     def generate_pseudonym(self, entity_type: str) -> str:
         """Generate more readable and relevant pseudonyms based on entity type"""
         pseudonym_map = {
-            "PER": lambda: f"Person_{uuid.uuid4().hex[:8]}",  # You can replace this with funny names
-            "ORG": lambda: f"Company_{uuid.uuid4().hex[:8]}",  # Add predefined company names if needed
-            "LOC": lambda: f"Location_{uuid.uuid4().hex[:8]}",  # Add predefined locations if needed
+            "PER": lambda: f"person_{uuid.uuid4().hex[:8]}",  # You can replace this with funny names
+            "ORG": lambda: f"company_{uuid.uuid4().hex[:8]}",  # Add predefined company names if needed
+            "LOC": lambda: f"location_{uuid.uuid4().hex[:8]}",  # Add predefined locations if needed
         }
-        return pseudonym_map.get(entity_type, lambda: "Unknown")()
+        return pseudonym_map.get(entity_type, lambda: "unknown")()

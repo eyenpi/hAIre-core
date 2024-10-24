@@ -1,8 +1,7 @@
-import os
-from dotenv import load_dotenv
 from openai import OpenAI
 from pypdf import PdfReader
-from io import BytesIO
+import pdfplumber
+import re
 
 
 class CVProcessor:
@@ -12,20 +11,56 @@ class CVProcessor:
         self.client = OpenAI(api_key=self.api_key)
 
     @staticmethod
-    def extract_text_from_cv(pdf_filename) -> str:
+    def clean_text(text: str) -> str:
         """
-        Extracts text from a PDF file in bytes format.
+        Cleans the extracted text by removing unnecessary spaces,
+        non-printable characters, and correcting common OCR errors.
 
         Args:
-            pdf_bytes (bytes): PDF content as bytes.
+            text (str): Raw extracted text.
 
         Returns:
-            str: Extracted text from the PDF, cleaned and formatted.
+            str: Cleaned text.
         """
-        reader = PdfReader(pdf_filename)
-        text = "\n\n\n".join([page.extract_text() for page in reader.pages])
-        cleaned_text = text.encode("ascii", "ignore").decode("ascii")
-        return cleaned_text
+        # Remove non-printable characters
+        text = re.sub(r"[^\x20-\x7E\n]", "", text)
+
+        # Replace multiple spaces/newlines with a single instance
+        text = re.sub(r"\s+", " ", text).strip()
+
+        return text
+
+    @staticmethod
+    def extract_text_from_cv(pdf_filename: str) -> str:
+        """
+        Extracts text from a PDF file.
+
+        Args:
+            pdf_filename (str): Path to the PDF file.
+
+        Returns:
+            str: Cleaned and formatted text extracted from the PDF.
+        """
+        try:
+            # Use pdfplumber for more accurate text extraction
+            with pdfplumber.open(pdf_filename) as pdf:
+                pages = [
+                    page.extract_text() for page in pdf.pages if page.extract_text()
+                ]
+
+            if not pages:  # Fallback if pdfplumber fails
+                reader = PdfReader(pdf_filename)
+                pages = [page.extract_text() for page in reader.pages]
+
+            # Join extracted text from all pages
+            raw_text = "\n\n".join(pages)
+
+            # Clean the extracted text
+            cleaned_text = CVProcessor.clean_text(raw_text)
+            return cleaned_text
+
+        except Exception as e:
+            raise Exception(f"Error extracting text from PDF: {str(e)}")
 
     def segment_cv(self, pseudonymized_text: str) -> str:
         """
@@ -39,9 +74,10 @@ class CVProcessor:
         """
         prompt = (
             """
-        Segment the following text into a JSON format with the fields 'name', 'email', 'work_experiences', and 'educations'. Each work experience should have 'position', 'company', 'from_to' (with dates in 'YYYY-MM-DD to YYYY-MM-DD' or 'YYYY-MM-DD to Present' format), and a 'description'. Each education entry should include 'degree', 'institution', and 'from_to' in the same date format. Ignore fields that are not present and do not add empty keys. Format the final output exactly as specified in the example.
+        Segment the following text into a JSON format with the fields 'name', 'email', 'work_experiences', and 'educations'. Each work experience should have 'position', 'company', 'from_to' (with dates in 'YYYY to YYYY' or 'YYYY to Present' format), and a 'description'. Each education entry should include 'degree', 'institution', and 'from_to' in the same date format. Ignore fields that are not present and do not add empty keys. Format the final output exactly as specified in the example.
+       
         *Example output:*
-
+        ```json
         {{
             "name": "Hosein",
             "email": "hoseinmirhoseini64@gmail.com",
@@ -67,9 +103,11 @@ class CVProcessor:
                 }}
             ]
         }}
+        ```
 
         return an answer that I can easily decode using json.loads().
         **Input text:**
+
         """
             + pseudonymized_text
         )
