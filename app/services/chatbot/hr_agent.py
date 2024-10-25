@@ -3,6 +3,7 @@ from typing import Dict
 from app.services.chatbot.relevant_agent import HREvaluationAgent
 from app.services.chatbot.clarification_agent import ClarificationAgent
 from app.services.chatbot.cv_agent import HRCVQuestionAgent
+from app.services.chatbot.technical_agent import HRTechnicalQuestionAgent
 import json
 
 
@@ -18,11 +19,23 @@ class HRQuestionnaireAgent:
 
         self.questions = config["questions"]
         self.ask_from_cv = config["ask_from_cv"]
+        self.ask_technical = config["ask_technical"]
+        self.job_description = config["job_info"]
         if self.ask_from_cv:
             self.cv_agent = HRCVQuestionAgent(api_key)
             with open("assets/segmented_cv.json", "r") as f:
                 cv_data = json.load(f)
             new_questions = self.cv_agent.generate_questions(cv_data)
+            for new_question in new_questions:
+                self.questions.append(new_question)
+
+        if self.ask_technical:
+            self.cv_tech_agent = HRTechnicalQuestionAgent(api_key)
+            with open("assets/segmented_cv.json", "r") as f:
+                cv_data = json.load(f)
+            new_questions = self.cv_tech_agent.generate_questions(
+                cv_data, self.job_description
+            )
             for new_question in new_questions:
                 self.questions.append(new_question)
 

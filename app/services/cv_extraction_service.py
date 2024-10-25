@@ -74,39 +74,40 @@ class CVProcessor:
         """
         prompt = (
             """
-        Segment the following text into a JSON format with the fields 'name', 'email', 'work_experiences', and 'educations'. Each work experience should have 'position', 'company', 'from_to' (with dates in 'YYYY to YYYY' or 'YYYY to Present' format), and a 'description'. Each education entry should include 'degree', 'institution', and 'from_to' in the same date format. Ignore fields that are not present and do not add empty keys. Format the final output exactly as specified in the example.
-       
-        *Example output:*
-        ```json
-        {{
-            "name": "Hosein",
-            "email": "hoseinmirhoseini64@gmail.com",
-            "work_experiences": [
-                {{
-                    "position": "Software Engineer",
-                    "company": "Scalapay",
-                    "from_to": "2021-01-01 to Present",
-                    "description": "Software Engineer at Scalapay"
-                }},
-                {{
-                    "position": "Frontend Developer",
-                    "company": "Apple",
-                    "from_to": "2020-01-01 to 2021-01-01",
-                    "description": "Frontend Developer at Apple"
-                }}
-            ],
-            "educations": [
-                {{
-                    "degree": "Bachelor of Computer Science",
-                    "institution": "Shiraz University",
-                    "from_to": "2017-01-01 to 2021-09-01"
-                }}
-            ]
-        }}
-        ```
+            Segment the following text into a JSON format with the fields 'name', 'email', 'work_experiences', 'educations', and 'skills'. Each work experience should have 'position', 'company', 'from_to' (with dates in 'YYYY to YYYY' or 'YYYY to Present' format), and a 'description'. Each education entry should include 'degree', 'institution', and 'from_to' in the same date format. 'Skills' should be an array of relevant skills mentioned in the text. Ignore fields that are not present and do not add empty keys. Format the final output exactly as specified in the example.
 
-        return an answer that I can easily decode using json.loads().
-        **Input text:**
+            *Example output:*
+
+            {
+                "name": "Hosein",
+                "email": "hoseinmirhoseini64@gmail.com",
+                "work_experiences": [
+                    {
+                        "position": "Software Engineer",
+                        "company": "Scalapay",
+                        "from_to": "2021-01-01 to Present",
+                        "description": "Software Engineer at Scalapay"
+                    },
+                    {
+                        "position": "Frontend Developer",
+                        "company": "Apple",
+                        "from_to": "2020-01-01 to 2021-01-01",
+                        "description": "Frontend Developer at Apple"
+                    }
+                ],
+                "educations": [
+                    {
+                        "degree": "Bachelor of Computer Science",
+                        "institution": "Shiraz University",
+                        "from_to": "2017-01-01 to 2021-09-01"
+                    }
+                ],
+                "skills": ["Python", "JavaScript", "Problem Solving"]
+            }
+            
+            Return an answer that I can easily decode using json.loads().
+            
+            **Input text:**
 
         """
             + pseudonymized_text
