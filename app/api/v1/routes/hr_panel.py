@@ -100,3 +100,13 @@ async def generate_report():
     return FileResponse(
         file_path, media_type="application/pdf", filename="hr_report.pdf"
     )
+
+
+@router.get("/download-report", status_code=status.HTTP_200_OK)
+async def download_report():
+    file_path = "assets/hr_report.pdf"
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=400, detail="File not found")
+    return FileResponse(
+        file_path, media_type="application/pdf", filename="hr_report.pdf"
+    )
