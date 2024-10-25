@@ -1,5 +1,6 @@
 from openai import OpenAI
 from app.utils.pdf import generate_pdf_report
+from app.utils.file_reader import get_hr_config
 
 
 class HRReportGenerator:
@@ -10,6 +11,8 @@ class HRReportGenerator:
         :param api_key: OpenAI API key for authentication
         """
         self.client = OpenAI(api_key=api_key)
+        self.config = get_hr_config()
+        self.job_description = self.config["job_info"]
 
     def _generate_prompt(self, conversation: str, criteria: list[str]) -> str:
         """
@@ -28,14 +31,20 @@ class HRReportGenerator:
         
         {criteria_text}
 
-        For each question, provide feedback on how well the candidate answered, highlight any strengths or concerns, and offer a brief summary of the candidate's overall performance.
+        For each question, provide feedback on how well the candidate answered, highlight any strengths or concerns, and offer a brief summary of the candidate's overall performance according to the job description.
 
-        End the report with a final recommendation to the HR manager, including whether the candidate should move forward in the hiring process, and any suggested follow-up questions or clarifications.
+        End the report with a final recommendation to the HR manager, including whether the candidate should move forward in the hiring process, and any suggested follow-up questions or clarifications according to the job description given below.
         Use HTML tags for formatting to enhance readability anywhere necessary.
 
         Here is the transcript of the conversation:
 
         {conversation}
+
+        Here is the job description:
+
+        {self.job_description}
+        
+        Reference explicitely to the job description should be made in all part of the response.
 
         Please structure the report as follows:
 
