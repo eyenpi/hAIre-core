@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Body
+from fastapi import APIRouter, status, HTTPException
 from typing import List
 from fastapi.responses import JSONResponse, FileResponse
 import os
@@ -9,6 +9,8 @@ from app.services.hr_report import HRReportGenerator
 from app.models.hr_model import HRInputModel
 from app.utils.singleton import AgentSingleton
 from app.utils.mail import EmailSender
+from app.models.cv_model import EvaluationResponse
+from app.services.cv_fit import CVJobFitEvaluator
 
 load_dotenv()
 
@@ -24,6 +26,8 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 # Instantiate the HRReportGenerator class
 hr_report_generator = HRReportGenerator(api_key=api_key)
+
+evaluator = CVJobFitEvaluator(api_key=api_key)
 
 
 @router.post("/config", status_code=status.HTTP_201_CREATED)
@@ -110,3 +114,26 @@ async def download_report():
     return FileResponse(
         file_path, media_type="application/pdf", filename="hr_report.pdf"
     )
+
+
+@router.get(
+    "/evaluate-fit", response_model=EvaluationResponse, status_code=status.HTTP_200_OK
+)
+async def evaluate_fit():
+    """
+    Evaluate the fit between the user's CV and the job description, returning a score and detailed assessment.
+
+    :param request: EvaluationRequest object with user_cv and job_description
+    :return: JSON response containing the score, evaluation, and overall assessment
+    """
+    try:
+        # read user cv and job description from file
+        with open("assets/segmented_cv.json", "r") as file:
+            user_cv = json.load(file)
+        hr_config = get_hr_config()
+        job_description = hr_config["job_info"]
+        result = evaluator.evaluate_fit(user_cv, job_description)
+
+        return EvaluationResponse(**result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

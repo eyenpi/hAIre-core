@@ -6,8 +6,7 @@ def get_hr_config():
     """
     Get the HR questions from the JSON file.
     """
-    QUESTIONS_FILE = os.getenv("QUESTIONS_FILE", "assets/hr_config.json")
-    # hr_config = {}
+    QUESTIONS_FILE = os.getenv("QUESTIONS_FILE", "assets/hr_questions.json")
 
     # Check if the JSON file exists and read from it
     if os.path.exists(QUESTIONS_FILE):
