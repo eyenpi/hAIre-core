@@ -22,7 +22,7 @@ async def speech_to_text(audio_file: UploadFile = File(...)):
         audio_bytes = await audio_file.read()
 
         # Step 2: Write the audio bytes to a temporary file (e.g., .wav format)
-        temp_audio_path = "temp_audio_file.wav"
+        temp_audio_path = "assets/temp_audio_file.wav"
         with open(temp_audio_path, "wb") as f:
             f.write(audio_bytes)
 

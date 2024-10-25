@@ -25,7 +25,8 @@ class ClarificationAgent:
         The answer of user was:
         {answer}
 
-        Provide a rephrased or clarifying question to help the candidate better understand the original question.
+        Provide a rephrased or clarifying question to help the candidate better understand the original question. Keep the question clear and concise.
+        Write the next question in the same language as the original question.
         """
         return clarification_prompt
 
@@ -44,7 +45,6 @@ class ClarificationAgent:
             messages=[
                 {"role": "assistant", "content": clarification_prompt},
             ],
-            max_tokens=1000,
         )
 
         return response.choices[0].message.content

@@ -17,7 +17,7 @@ class TextToSpeechService:
         :return: The audio content in bytes.
         """
         response = self.client.audio.speech.create(
-            model="tts-1", voice="alloy", input=text
+            model="tts-1", voice="onyx", input=text
         )
         audio_content = response.read()
         return audio_content

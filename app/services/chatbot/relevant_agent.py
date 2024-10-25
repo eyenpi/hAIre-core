@@ -21,15 +21,9 @@ class HREvaluationAgent:
         """
         prompt = f"""
         You are an HR assistant helping to evaluate candidates' answers to interview questions. 
-        Please evaluate the following answer based on these criteria:
+        Please evaluate the following answer based on **Relevance** criteria which is about does the answer directly address the question?
 
-        1. **Relevance**: Does the answer directly address the question?
-        2. **Completeness**: Does the answer provide sufficient detail?
-        3. **Clarity**: Is the answer clear and easy to understand?
-        4. **Conciseness**: Is the answer to the point or overly verbose?
-
-        Score each criterion on a scale of 1 to 10, where 10 is excellent and 1 is very poor. 
-        Then, provide an overall score by averaging the four criteria.
+        Score relevancy on a scale of 1 to 10, where 10 is excellent and 1 is very poor. 
 
         Question: {question}
         Answer: {answer}
@@ -37,10 +31,6 @@ class HREvaluationAgent:
         Provide your evaluation in the following JSON format:
         {{
             "Relevance": [score out of 10],
-            "Completeness": [score out of 10],
-            "Clarity": [score out of 10],
-            "Conciseness": [score out of 10],
-            "Overall Score": [average score out of 10]
         }}
         """
         return prompt
