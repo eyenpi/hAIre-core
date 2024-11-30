@@ -20,7 +20,9 @@ class EmailSender:
         self.password = os.getenv("SMTP_PASSWORD")
         self.from_email = os.getenv("FROM_EMAIL")
 
-    def send_email(self, to_email: str, subject: str, body: str, file_path: str = None):
+    def send_email(
+        self, to_email: str, subject: str, body: str, file_paths: list = None
+    ):
         # Create the email message
         msg = MIMEMultipart()
         msg["From"] = self.from_email
@@ -29,8 +31,9 @@ class EmailSender:
         msg.attach(MIMEText(body, "plain"))
 
         # Attach the file if provided
-        if file_path:
-            self.attach_file(msg, file_path)
+        for file_path in file_paths:
+            if file_path:
+                self.attach_file(msg, file_path)
 
         # Send the email using the SMTP server
         try:

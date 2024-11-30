@@ -16,3 +16,7 @@ soundfile
 pypdf
 pdfplumber
 reportlab
+matplotlib
+plotly
+seaborn
+kaleido

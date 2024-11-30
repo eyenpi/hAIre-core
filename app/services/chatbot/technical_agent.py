@@ -19,7 +19,9 @@ class HRTechnicalQuestionAgent:
         :return: The prompt string to be sent to the model
         """
         question_prompt = f"""
-        You are an assistant conducting a technical interview. You are an expert in your field and you only ask short technical questions about the user and job description. Based on the following resume:
+        You are an assistant conducting a technical interview. You are an expert in your field and you only ask short technical questions about the user and job description.
+        Make sure to find patterns in the resume and job description and mention them in the question.
+        Based on the following resume:
 
         {resume}
 

@@ -74,6 +74,7 @@ async def generate_report():
     """
     conversation_file = "logs/conversation.log"
     file_path = "assets/hr_report.pdf"
+    file_path_short = "assets/hr_report_short.pdf"
     hr_config = get_hr_config()
     metrics = hr_config["metrics"]
 
@@ -84,6 +85,7 @@ async def generate_report():
             "Clarity",
             "Consistency",
             "Strengths and Weaknesses",
+            "Technical Knowledge",
         ]
     # read conversation from file
     with open(conversation_file, "r") as file:
@@ -93,12 +95,16 @@ async def generate_report():
         conversation, file_path, criteria=metrics
     )
 
+    report_content_short = hr_report_generator.generate_criteria_scores(
+        conversation, file_path_short, criteria=metrics
+    )
+
     email_sender = EmailSender()
     email_sender.send_email(
         to_email=hr_config["email_address"],
         subject="HR Interview Report",
         body="Please find the attached HR interview report for your review.",
-        file_path=file_path,
+        file_paths=[file_path, file_path_short],
     )
 
     return FileResponse(
@@ -113,6 +119,16 @@ async def download_report():
         raise HTTPException(status_code=400, detail="File not found")
     return FileResponse(
         file_path, media_type="application/pdf", filename="hr_report.pdf"
+    )
+
+
+@router.get("/download-report-short", status_code=status.HTTP_200_OK)
+async def download_report():
+    file_path = "assets/hr_report_short.pdf"
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=400, detail="File not found")
+    return FileResponse(
+        file_path, media_type="application/pdf", filename="hr_report_short.pdf"
     )
 
 
