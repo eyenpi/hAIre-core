@@ -37,4 +37,4 @@ If you’re passionate about AI in HR tech, feel free to contribute or connect w
 
 📌 GitHub Repositories:
 - [Core](https://github.com/eyenpi/hAIre-core)
-- [Frontend]([https://github.com/hoseinmrh/hAIre-Client)
+- [Frontend](https://github.com/hoseinmrh/hAIre-Client)
