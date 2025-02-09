@@ -4,10 +4,10 @@ hAIre is an AI-driven platform designed to streamline HR interviews, automate CV
 
 ## 🚀 Features
 
-✅ Automated CV Screening – Extracts and analyzes candidate resumes to assess job fit.
-✅ AI-Powered Interview Bot – Conducts interactive, structured HR and technical interviews.
-✅ Real-Time Candidate Reports – Generates structured insights for HR teams.
-✅ Multilingual Support – Enables AI-driven interviews in multiple languages.
+✅ Automated CV Screening – Extracts and analyzes candidate resumes to assess job fit. \
+✅ AI-Powered Interview Bot – Conducts interactive, structured HR and technical interviews. \
+✅ Real-Time Candidate Reports – Generates structured insights for HR teams. \
+✅ Multilingual Support – Enables AI-driven interviews in multiple languages. \
 ✅ Privacy-First Design – Ensures GDPR compliance by anonymizing sensitive data.
 
 ## ⚡ Quickstart Guide
